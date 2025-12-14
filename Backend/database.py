@@ -1,15 +1,15 @@
-# backend/database.py
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
+from dotenv import load_dotenv
 
-# Neon PostgreSQL connection URL
-DATABASE_URL = (
-    "postgresql://neondb_owner:npg_hrYSM3kNwCq7@ep-lucky-wildflower-a12fhgh1-pooler.ap-southeast-1.aws.neon.tech/"
-    "neondb?sslmode=require&channel_binding=require"
-)
+load_dotenv()
+
+DATABASE_URL = os.getenv("NEONURL")
+if not DATABASE_URL:
+    raise ValueError("❌ NEONURL environment variable is not set.")
 
 Base = declarative_base()
 
-# Create engine & session
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
