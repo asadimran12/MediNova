@@ -14,9 +14,8 @@ import {
 } from "react-native";
 import Constants from 'expo-constants';
 
-// TODO: Implement authentication using REST API calls to the backend server
-// The backend is now running separately at E:\Projects\MediNovaBackend
-// See backend README.md for API endpoints and usage examples
+// Backend API URL
+const API_URL = 'https://medinova-igij.onrender.com';
 
 
 export default function SignupScreen() {
@@ -37,34 +36,39 @@ export default function SignupScreen() {
       return;
     }
 
-    // 2. Call Backend API (TODO: Implement REST API call)
+    // 2. Call Backend API
     try {
-      // TODO: Replace this with actual API call to the backend
-      // Example:
-      // const response = await fetch('http://localhost:8000/auth/register', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ username: fullName, email, password })
-      // });
-      // const result = await response.json();
-
       console.log("Attempting signup with:", { fullName, email });
 
-      Alert.alert(
-        "Authentication Not Configured",
-        "Backend authentication has been separated. Please implement REST API calls to the backend server."
-      );
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: fullName,
+          email,
+          password
+        })
+      });
 
-      // Temporary: Commenting out navigation
-      // Alert.alert("Success", "Account created successfully!");
-      // setTimeout(() => {
-      //   router.back();
-      // }, 1500);
+      const result = await response.json();
+
+      if (!response.ok) {
+        Alert.alert("Registration Failed", result.detail || "Failed to create account");
+        return;
+      }
+
+      Alert.alert("Success", "Account created successfully!");
+      // Automatically navigate to sign-in page after 1.5 seconds
+      setTimeout(() => {
+        router.back();
+      }, 1500);
     } catch (error) {
-      console.log("Signup error:", (error as any).message);
+      console.log("Signup error:", error);
       Alert.alert(
         "Error",
-        (error as any).message
+        "Could not connect to backend. Please check your internet connection."
       );
     }
   };
@@ -77,7 +81,8 @@ export default function SignupScreen() {
     >
       <KeyboardAvoidingView
         className="flex-1"
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior="padding"
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <ScrollView
           contentContainerStyle={{

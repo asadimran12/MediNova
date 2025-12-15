@@ -14,9 +14,8 @@ import {
 } from "react-native";
 import Constants from 'expo-constants';
 
-// TODO: Implement authentication using REST API calls to the backend server
-// The backend is now running separately at E:\Projects\MediNovaBackend
-// See backend README.md for API endpoints and usage examples
+// Backend API URL
+const API_URL = 'https://medinova-igij.onrender.com';
 
 
 export default function HomeScreen() {
@@ -30,27 +29,42 @@ export default function HomeScreen() {
     }
 
     try {
-      // TODO: Replace this with actual API call to the backend
-      // Example:
-      // const response = await fetch('http://localhost:8000/auth/login', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ email, password })
-      // });
-      // const result = await response.json();
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password })
+      });
 
-      Alert.alert(
-        "Authentication Not Configured",
-        "Backend authentication has been separated. Please implement REST API calls to the backend server."
-      );
+      // Get response text first to debug parsing issues
+      const responseText = await response.text();
+      console.log("Raw response:", responseText);
 
-      // Temporary: Allow navigation for development
-      // router.push("/home");
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error("Failed to parse response:", responseText);
+        Alert.alert("Error", "Server returned invalid response. Please try again later.");
+        return;
+      }
+
+      if (!response.ok) {
+        Alert.alert("Login Failed", result.detail || "Invalid credentials");
+        return;
+      }
+
+      // Store the access token (you might want to use AsyncStorage here)
+      console.log("Login successful! Token:", result.access_token);
+
+      // Navigate to chatbot home page
+      router.push("/(Home)/home");
     } catch (error) {
-      console.log("Login error:", (error as any).message);
+      console.log("Login error:", error);
       Alert.alert(
         "Error",
-        "Could not connect to backend."
+        "Could not connect to backend. Please check your internet connection."
       );
     }
   };
@@ -63,7 +77,8 @@ export default function HomeScreen() {
     >
       <KeyboardAvoidingView
         className="flex-1"
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior="padding"
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <ScrollView
           contentContainerStyle={{
@@ -73,9 +88,7 @@ export default function HomeScreen() {
           }}
           showsVerticalScrollIndicator={false}
         >
-          <Text className="text-4xl font-bold text-green-600 text-center mb-10 tracking-widest drop-shadow-lg">
-            MediNova
-          </Text>
+          <Image source={require("../(Home)/Mainlogo.png")} className="w-40 h-40 self-center" />
 
           <View className="bg-white/95 rounded-3xl px-6 py-8 shadow-xl w-full max-w-sm self-center">
             <View className="items-center mb-4">
