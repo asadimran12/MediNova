@@ -24,7 +24,7 @@ async def chat(request: ChatRequest):
         raise HTTPException(status_code=500, detail="Gemini API key not configured")
     
     try:
-        model = genai.GenerativeModel('gemini-2.0-flash')
+        model = genai.GenerativeModel('gemini-2.5-flash')
         response = model.generate_content(request.message)
         return {"response": response.text}
     except Exception as e:
