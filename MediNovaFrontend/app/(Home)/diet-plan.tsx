@@ -35,8 +35,45 @@ export default function DietPlanScreen() {
 
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-    // Diet plan data - loaded from backend
-    const [dietPlan, setDietPlan] = useState<Record<string, DayPlan>>({});
+    // Diet plan data - loaded from backend or sample data
+    const [dietPlan, setDietPlan] = useState<Record<string, DayPlan>>({
+        Monday: {
+            breakfast: [
+                { name: 'Oatmeal with Berries', calories: 320, protein: 12, carbs: 54, fat: 6 },
+                { name: 'Greek Yogurt', calories: 150, protein: 15, carbs: 12, fat: 4 },
+            ],
+            lunch: [
+                { name: 'Grilled Chicken Salad', calories: 450, protein: 35, carbs: 25, fat: 18 },
+                { name: 'Quinoa Bowl', calories: 280, protein: 10, carbs: 45, fat: 8 },
+            ],
+            dinner: [
+                { name: 'Baked Salmon', calories: 380, protein: 40, carbs: 5, fat: 22 },
+                { name: 'Steamed Vegetables', calories: 120, protein: 4, carbs: 20, fat: 2 },
+            ],
+            snacks: [
+                { name: 'Apple with Almond Butter', calories: 200, protein: 5, carbs: 22, fat: 12 },
+                { name: 'Protein Shake', calories: 180, protein: 25, carbs: 8, fat: 4 },
+            ],
+        },
+        Tuesday: {
+            breakfast: [
+                { name: 'Scrambled Eggs', calories: 280, protein: 20, carbs: 4, fat: 18 },
+                { name: 'Whole Grain Toast', calories: 140, protein: 6, carbs: 24, fat: 2 },
+            ],
+            lunch: [
+                { name: 'Turkey Wrap', calories: 380, protein: 28, carbs: 35, fat: 14 },
+                { name: 'Mixed Greens Salad', calories: 120, protein: 3, carbs: 12, fat: 7 },
+            ],
+            dinner: [
+                { name: 'Grilled Chicken Breast', calories: 330, protein: 42, carbs: 0, fat: 16 },
+                { name: 'Sweet Potato', calories: 180, protein: 4, carbs: 41, fat: 0 },
+            ],
+            snacks: [
+                { name: 'Mixed Nuts', calories: 170, protein: 6, carbs: 6, fat: 15 },
+                { name: 'Carrot Sticks with Hummus', calories: 140, protein: 5, carbs: 16, fat: 7 },
+            ],
+        },
+    });
 
     const currentPlan = dietPlan[selectedDay] || {
         breakfast: [],
