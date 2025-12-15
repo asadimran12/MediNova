@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -6,9 +6,11 @@ import {
     TouchableOpacity,
     Alert,
     ImageBackground,
+    ActivityIndicator,
 } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface MealItem {
     name: string;
@@ -28,6 +30,9 @@ interface DayPlan {
 export default function DietPlanScreen() {
     const [selectedDay, setSelectedDay] = useState('Monday');
     const [isGenerating, setIsGenerating] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [userId, setUserId] = useState<number | null>(null);
+    const API_URL = 'https://medinova-igij.onrender.com';
 
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -76,16 +81,98 @@ export default function DietPlanScreen() {
 
     const totalNutrition = calculateTotalNutrition();
 
-    const handleGenerateAIPlan = () => {
+    // Load user ID and diet plan on mount
+    useEffect(() => {
+        loadUserData();
+    }, []);
+
+    const loadUserData = async () => {
+        try {
+            // Get user ID from storage (saved during login)
+            const userStr = await AsyncStorage.getItem('user');
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                const id = user.id || 1; // Default to 1 if no ID
+                setUserId(id);
+                // Load existing diet plan
+                await loadDietPlan(id);
+            }
+        } catch (error) {
+            console.error('Error loading user data:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const loadDietPlan = async (uid: number) => {
+        try {
+            const response = await fetch(`${API_URL}/diet/${uid}`);
+            const data = await response.json();
+            if (data.success && data.diet_plan) {
+                setDietPlan(data.diet_plan);
+            }
+        } catch (error) {
+            console.error('Error loading diet plan:', error);
+        }
+    };
+
+    const handleGenerateAIPlan = async () => {
+        if (!userId) {
+            Alert.alert('Error', 'User not logged in');
+            return;
+        }
+
         setIsGenerating(true);
-        setTimeout(() => {
+        try {
+            const response = await fetch(`${API_URL}/diet/generate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: userId,
+                    preferences: '' // Can be customized
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.diet_plan) {
+                // Delete old plan first
+                await fetch(`${API_URL}/diet/${userId}`, { method: 'DELETE' });
+
+                // Save new plan to database
+                for (const [day, meals] of Object.entries(data.diet_plan)) {
+                    for (const [mealType, mealItems] of Object.entries(meals as any)) {
+                        for (const meal of mealItems as any[]) {
+                            await fetch(`${API_URL}/diet/save`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    user_id: userId,
+                                    day: day,
+                                    meal_type: mealType,
+                                    meal_name: meal.name,
+                                    calories: meal.calories,
+                                    protein: meal.protein,
+                                    carbs: meal.carbs,
+                                    fat: meal.fat
+                                })
+                            });
+                        }
+                    }
+                }
+
+                // Update UI
+                setDietPlan(data.diet_plan);
+                Alert.alert('Success', 'Your personalized diet plan has been generated!');
+            } else {
+                Alert.alert('Error', 'Failed to generate diet plan. Please try again.');
+            }
+        } catch (error: any) {
+            console.error('Error:', error);
+            Alert.alert('Error', error.message || 'Failed to generate diet plan');
+        } finally {
             setIsGenerating(false);
-            Alert.alert(
-                'AI Diet Plan',
-                'This feature will generate a personalized diet plan based on your health goals and preferences.',
-                [{ text: 'OK' }]
-            );
-        }, 1500);
+        }
     };
 
     const renderMealSection = (title: string, meals: MealItem[], icon: string) => (
