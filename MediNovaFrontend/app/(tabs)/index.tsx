@@ -88,7 +88,7 @@ export default function HomeScreen() {
           }}
           showsVerticalScrollIndicator={false}
         >
-          <Image source={require("../(Home)/Mainlogo.png")} className="w-40 h-40 self-center" />
+          <Image source={require("../(Home)/Mainlogo.jpeg")} className="w-40 h-40 self-center" />
 
           <View className="bg-white/95 rounded-3xl px-6 py-8 shadow-xl w-full max-w-sm self-center">
             <View className="items-center mb-4">

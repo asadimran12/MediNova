@@ -27,7 +27,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
             <View className="bg-white pt-12 px-4 border-b border-gray-200">
                 <View className="flex-row justify-between items-center mb-4">
                     <Image
-                        source={require("../(Home)/Mainlogo.png")}
+                        source={require("../(Home)/Mainlogo.jpeg")}
                         style={{ width: 120, height: 80 }}
                         resizeMode="contain"
                     />
