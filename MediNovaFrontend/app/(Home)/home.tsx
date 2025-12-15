@@ -182,8 +182,8 @@ export default function HomeScreen() {
             {/* Message Content */}
             <View
                 className={`max-w-[70%] rounded-2xl px-4 py-3 ${item.isUser
-                        ? 'bg-blue-500 rounded-tr-none'
-                        : 'bg-gray-100 rounded-tl-none border border-gray-200'
+                    ? 'bg-blue-500 rounded-tr-none'
+                    : 'bg-gray-100 rounded-tl-none border border-gray-200'
                     }`}
             >
                 <Text className={`${item.isUser ? 'text-white' : 'text-gray-800'} text-base leading-relaxed`}>
@@ -234,7 +234,7 @@ export default function HomeScreen() {
                         {/* Center Title */}
                         <View className="flex-1 items-center">
                             <Image
-                                source={require('./Mainlogo.png')}
+                                source={require('./Mainlogo.jpeg')}
                                 style={{ width: 150, height: 100 }}
                                 resizeMode="contain"
                             />
