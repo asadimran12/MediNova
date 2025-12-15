@@ -35,29 +35,15 @@ export default function DietPlanScreen() {
 
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-    // Sample diet plan data
-    const [dietPlan, setDietPlan] = useState<Record<string, DayPlan>>({
-        Monday: {
-            breakfast: [
-                { name: 'Oatmeal with Berries', calories: 320, protein: 12, carbs: 54, fat: 6 },
-                { name: 'Greek Yogurt', calories: 150, protein: 15, carbs: 12, fat: 4 },
-            ],
-            lunch: [
-                { name: 'Grilled Chicken Salad', calories: 450, protein: 35, carbs: 25, fat: 18 },
-                { name: 'Quinoa Bowl', calories: 280, protein: 10, carbs: 45, fat: 8 },
-            ],
-            dinner: [
-                { name: 'Baked Salmon', calories: 380, protein: 40, carbs: 5, fat: 22 },
-                { name: 'Steamed Vegetables', calories: 120, protein: 4, carbs: 20, fat: 2 },
-            ],
-            snacks: [
-                { name: 'Apple with Almond Butter', calories: 200, protein: 5, carbs: 22, fat: 12 },
-                { name: 'Protein Shake', calories: 180, protein: 25, carbs: 8, fat: 4 },
-            ],
-        },
-    });
+    // Diet plan data - loaded from backend
+    const [dietPlan, setDietPlan] = useState<Record<string, DayPlan>>({});
 
-    const currentPlan = dietPlan[selectedDay] || dietPlan['Monday'];
+    const currentPlan = dietPlan[selectedDay] || {
+        breakfast: [],
+        lunch: [],
+        dinner: [],
+        snacks: []
+    };
 
     const calculateTotalNutrition = () => {
         const allMeals = [
