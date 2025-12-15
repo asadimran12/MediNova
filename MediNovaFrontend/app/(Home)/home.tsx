@@ -89,7 +89,11 @@ export default function HomeScreen() {
         */
     };
 
-    const handleSend = () => {
+    const [isLoading, setIsLoading] = useState(false);
+    // Replace with your machine's IP address if running on physical device
+    const API_URL = 'https://medinova-igij.onrender.com/chat/';
+
+    const handleSend = async () => {
         if (!inputText.trim()) return;
 
         // Add user message
@@ -102,17 +106,49 @@ export default function HomeScreen() {
 
         setMessages((prev) => [...prev, userMessage]);
         setInputText('');
+        setIsLoading(true);
 
-        // Simulate AI response (replace with actual API call later)
-        setTimeout(() => {
-            const aiMessage: Message = {
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: inputText }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                const aiMessage: Message = {
+                    id: (Date.now() + 1).toString(),
+                    text: data.response || "I couldn't generate a response.",
+                    isUser: false,
+                    timestamp: new Date(),
+                };
+                setMessages((prev) => [...prev, aiMessage]);
+            } else {
+                console.error("API Error:", data);
+                const errorMessage: Message = {
+                    id: (Date.now() + 1).toString(),
+                    text: "Sorry, I encountered an error communicating with the server.",
+                    isUser: false,
+                    timestamp: new Date(),
+                };
+                setMessages((prev) => [...prev, errorMessage]);
+            }
+        } catch (error) {
+            console.error("Network Error:", error);
+            const errorMessage: Message = {
                 id: (Date.now() + 1).toString(),
-                text: 'Thank you for your question. I\'m here to help. Please note that I\'m an AI assistant and my responses should not replace professional medical advice.',
+                text: "Sorry, I couldn't reach the server. Please check your connection.",
                 isUser: false,
                 timestamp: new Date(),
             };
-            setMessages((prev) => [...prev, aiMessage]);
-        }, 1000);
+            setMessages((prev) => [...prev, errorMessage]);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const renderMessage = ({ item }: { item: Message }) => (

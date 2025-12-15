@@ -4,11 +4,16 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from database import engine 
 from routers.auth_router import router as authrouter
+from routers.chat_router import router as chatrouter
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI()
 
 
 app.include_router(authrouter)
+app.include_router(chatrouter)
 
 @app.on_event("startup")
 def test_db_connection():
