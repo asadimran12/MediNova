@@ -93,19 +93,14 @@ export default function SignupScreen() {
           }}
           showsVerticalScrollIndicator={false}
         >
-          {/* Header Title */}
-          <Text className="text-4xl font-bold text-green-600 text-center mb-6 tracking-widest drop-shadow-lg">
-            MediNova
-          </Text>
-
           {/* White Card Container */}
           <View className="bg-white/95 rounded-3xl px-6 py-8 shadow-xl w-full max-w-sm self-center">
 
             {/* Logo Image */}
             <View className="items-center mb-4">
               <Image
-                source={require("../../assets/images/Home.jpeg")}
-                className="w-24 h-24" // Made slightly smaller for signup to fit more inputs
+                source={require("../(Home)/Mainlogo.jpeg")}
+                className="w-32 h-32"
                 resizeMode="contain"
               />
             </View>
