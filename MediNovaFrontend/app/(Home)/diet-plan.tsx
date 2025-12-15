@@ -29,7 +29,6 @@ interface DayPlan {
 
 export default function DietPlanScreen() {
     const [selectedDay, setSelectedDay] = useState('Monday');
-    const [isGenerating, setIsGenerating] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [userId, setUserId] = useState<number | null>(null);
     const API_URL = 'https://medinova-igij.onrender.com';
@@ -37,7 +36,7 @@ export default function DietPlanScreen() {
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
     // Sample diet plan data
-    const dietPlan: Record<string, DayPlan> = {
+    const [dietPlan, setDietPlan] = useState<Record<string, DayPlan>>({
         Monday: {
             breakfast: [
                 { name: 'Oatmeal with Berries', calories: 320, protein: 12, carbs: 54, fat: 6 },
@@ -56,7 +55,7 @@ export default function DietPlanScreen() {
                 { name: 'Protein Shake', calories: 180, protein: 25, carbs: 8, fat: 4 },
             ],
         },
-    };
+    });
 
     const currentPlan = dietPlan[selectedDay] || dietPlan['Monday'];
 
@@ -110,68 +109,10 @@ export default function DietPlanScreen() {
             const data = await response.json();
             if (data.success && data.diet_plan) {
                 setDietPlan(data.diet_plan);
+                // setDietPlan(data.diet_plan); // This line was commented out or missing context in the original
             }
         } catch (error) {
             console.error('Error loading diet plan:', error);
-        }
-    };
-
-    const handleGenerateAIPlan = async () => {
-        if (!userId) {
-            Alert.alert('Error', 'User not logged in');
-            return;
-        }
-
-        setIsGenerating(true);
-        try {
-            const response = await fetch(`${API_URL}/diet/generate`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: userId,
-                    preferences: '' // Can be customized
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.success && data.diet_plan) {
-                // Delete old plan first
-                await fetch(`${API_URL}/diet/${userId}`, { method: 'DELETE' });
-
-                // Save new plan to database
-                for (const [day, meals] of Object.entries(data.diet_plan)) {
-                    for (const [mealType, mealItems] of Object.entries(meals as any)) {
-                        for (const meal of mealItems as any[]) {
-                            await fetch(`${API_URL}/diet/save`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    user_id: userId,
-                                    day: day,
-                                    meal_type: mealType,
-                                    meal_name: meal.name,
-                                    calories: meal.calories,
-                                    protein: meal.protein,
-                                    carbs: meal.carbs,
-                                    fat: meal.fat
-                                })
-                            });
-                        }
-                    }
-                }
-
-                // Update UI
-                setDietPlan(data.diet_plan);
-                Alert.alert('Success', 'Your personalized diet plan has been generated!');
-            } else {
-                Alert.alert('Error', 'Failed to generate diet plan. Please try again.');
-            }
-        } catch (error: any) {
-            console.error('Error:', error);
-            Alert.alert('Error', error.message || 'Failed to generate diet plan');
-        } finally {
-            setIsGenerating(false);
         }
     };
 
@@ -277,22 +218,16 @@ export default function DietPlanScreen() {
                     {renderMealSection('Dinner', currentPlan.dinner, 'moon')}
                     {renderMealSection('Snacks', currentPlan.snacks, 'nutrition')}
 
-                    {/* AI Generation Button */}
-                    <TouchableOpacity
-                        onPress={handleGenerateAIPlan}
-                        disabled={isGenerating}
-                        className="bg-[#00A67E] rounded-2xl p-4 flex-row items-center justify-center shadow-lg mt-4 mb-6"
-                    >
-                        <Ionicons
-                            name={isGenerating ? 'reload' : 'sparkles'}
-                            size={24}
-                            color="white"
-                            style={{ marginRight: 8 }}
-                        />
-                        <Text className="text-white text-lg font-bold">
-                            {isGenerating ? 'Generating...' : 'Generate AI Diet Plan'}
+                    {/* Info Card */}
+                    <View className="bg-green-50 rounded-2xl p-4 mb-6 border border-green-100 mt-4">
+                        <View className="flex-row items-center mb-2">
+                            <Ionicons name="information-circle" size={20} color="#00A67E" />
+                            <Text className="text-green-700 font-bold ml-2">Get Your Diet Plan</Text>
+                        </View>
+                        <Text className="text-green-600 text-sm">
+                            Ask me to create a diet plan in the chat, and I'll generate a personalized weekly meal plan for you! Just say "create me a diet plan" or "I need a meal plan" to get started.
                         </Text>
-                    </TouchableOpacity>
+                    </View>
 
                     {/* Tips Card */}
                     <View className="bg-blue-50 rounded-2xl p-4 mb-6 border border-blue-100">
