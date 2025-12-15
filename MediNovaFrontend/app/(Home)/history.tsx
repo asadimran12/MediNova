@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
     View,
     Text,
@@ -9,93 +9,53 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
-interface HistoryItem {
+interface ChatHistoryItem {
     id: string;
     date: string;
     time: string;
-    title: string;
-    summary: string;
-    category: 'consultation' | 'diet' | 'medication' | 'checkup';
+    preview: string;
+    messageCount: number;
 }
 
 export default function HistoryScreen() {
-    const [selectedFilter, setSelectedFilter] = useState<string>('all');
-
-    const filters = [
-        { id: 'all', label: 'All', icon: 'apps' },
-        { id: 'consultation', label: 'Consultations', icon: 'chatbubbles' },
-        { id: 'diet', label: 'Diet', icon: 'restaurant' },
-        { id: 'medication', label: 'Medication', icon: 'medkit' },
-        { id: 'checkup', label: 'Checkups', icon: 'fitness' },
-    ];
-
-    // Sample history data
-    const historyData: HistoryItem[] = [
+    // Sample chat history data
+    const chatHistory: ChatHistoryItem[] = [
         {
             id: '1',
-            date: '2025-12-15',
+            date: 'Dec 15, 2025',
             time: '09:30 AM',
-            title: 'AI Health Consultation',
-            summary: 'Discussed symptoms of headache and received recommendations for rest and hydration.',
-            category: 'consultation',
+            preview: 'Can you help me with a diet plan for weight loss?',
+            messageCount: 12,
         },
         {
             id: '2',
-            date: '2025-12-14',
+            date: 'Dec 14, 2025',
             time: '02:15 PM',
-            title: 'Diet Plan Generated',
-            summary: 'Created personalized 7-day diet plan focusing on high protein and low carbs.',
-            category: 'diet',
+            preview: 'What are the symptoms of common cold and how to treat it?',
+            messageCount: 8,
         },
         {
             id: '3',
-            date: '2025-12-13',
+            date: 'Dec 13, 2025',
             time: '11:00 AM',
-            title: 'Medication Reminder',
-            summary: 'Vitamin D supplement taken as prescribed.',
-            category: 'medication',
+            preview: 'I need advice on managing stress and anxiety',
+            messageCount: 15,
         },
         {
             id: '4',
-            date: '2025-12-12',
+            date: 'Dec 12, 2025',
             time: '08:45 AM',
-            title: 'Morning Health Check',
-            summary: 'Blood pressure: 120/80, Heart rate: 72 bpm, Weight: 70kg',
-            category: 'checkup',
+            preview: 'Can you recommend exercises for lower back pain?',
+            messageCount: 10,
         },
         {
             id: '5',
-            date: '2025-12-11',
+            date: 'Dec 11, 2025',
             time: '04:30 PM',
-            title: 'AI Consultation - Cold Symptoms',
-            summary: 'Received advice on managing common cold symptoms and recommended rest.',
-            category: 'consultation',
+            preview: 'What foods should I avoid with high cholesterol?',
+            messageCount: 7,
         },
     ];
-
-    const getCategoryColor = (category: string) => {
-        const colors = {
-            consultation: { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-200' },
-            diet: { bg: 'bg-green-50', text: 'text-green-600', border: 'border-green-200' },
-            medication: { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-200' },
-            checkup: { bg: 'bg-purple-50', text: 'text-purple-600', border: 'border-purple-200' },
-        };
-        return colors[category as keyof typeof colors] || colors.consultation;
-    };
-
-    const getCategoryIcon = (category: string) => {
-        const icons = {
-            consultation: 'chatbubbles',
-            diet: 'restaurant',
-            medication: 'medkit',
-            checkup: 'fitness',
-        };
-        return icons[category as keyof typeof icons] || 'document-text';
-    };
-
-    const filteredHistory = selectedFilter === 'all'
-        ? historyData
-        : historyData.filter(item => item.category === selectedFilter);
 
     return (
         <ImageBackground
@@ -111,7 +71,7 @@ export default function HistoryScreen() {
                             <Ionicons name="arrow-back" size={24} color="white" />
                         </TouchableOpacity>
                         <Text className="text-white text-2xl font-bold flex-1 text-center mr-10">
-                            History
+                            Chat History
                         </Text>
                     </View>
 
@@ -119,113 +79,80 @@ export default function HistoryScreen() {
                     <View className="bg-white/20 rounded-2xl p-4">
                         <View className="flex-row justify-around">
                             <View className="items-center">
-                                <Text className="text-white text-2xl font-bold">{historyData.length}</Text>
-                                <Text className="text-white/80 text-xs">Total Records</Text>
+                                <Text className="text-white text-2xl font-bold">{chatHistory.length}</Text>
+                                <Text className="text-white/80 text-xs">Conversations</Text>
                             </View>
                             <View className="items-center">
                                 <Text className="text-white text-2xl font-bold">
-                                    {historyData.filter(h => h.category === 'consultation').length}
+                                    {chatHistory.reduce((sum, chat) => sum + chat.messageCount, 0)}
                                 </Text>
-                                <Text className="text-white/80 text-xs">Consultations</Text>
+                                <Text className="text-white/80 text-xs">Total Messages</Text>
                             </View>
                             <View className="items-center">
-                                <Text className="text-white text-2xl font-bold">
-                                    {historyData.filter(h => h.category === 'checkup').length}
-                                </Text>
-                                <Text className="text-white/80 text-xs">Checkups</Text>
+                                <Text className="text-white text-2xl font-bold">7</Text>
+                                <Text className="text-white/80 text-xs">Days Active</Text>
                             </View>
                         </View>
                     </View>
                 </View>
 
-                {/* Filter Tabs */}
-                <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    className="max-h-20 bg-white border-b border-gray-200"
-                    contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12 }}
-                >
-                    {filters.map((filter) => (
-                        <TouchableOpacity
-                            key={filter.id}
-                            onPress={() => setSelectedFilter(filter.id)}
-                            className={selectedFilter === filter.id
-                                ? 'flex-row items-center px-4 py-2 rounded-full mr-2 bg-[#00A67E]'
-                                : 'flex-row items-center px-4 py-2 rounded-full mr-2 bg-gray-100'}
-                        >
-                            <Ionicons
-                                name={filter.icon as any}
-                                size={16}
-                                color={selectedFilter === filter.id ? 'white' : '#6B7280'}
-                                style={{ marginRight: 6 }}
-                            />
-                            <Text className={selectedFilter === filter.id ? 'font-semibold text-white' : 'font-semibold text-gray-600'}>
-                                {filter.label}
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
-                </ScrollView>
-
-                {/* History List */}
+                {/* Chat History List */}
                 <ScrollView className="flex-1 px-4 py-4" showsVerticalScrollIndicator={false}>
-                    {filteredHistory.length === 0 ? (
+                    {chatHistory.length === 0 ? (
                         <View className="items-center justify-center py-20">
-                            <Ionicons name="document-text-outline" size={64} color="#D1D5DB" />
-                            <Text className="text-gray-400 text-lg mt-4">No records found</Text>
+                            <Ionicons name="chatbubbles-outline" size={64} color="#D1D5DB" />
+                            <Text className="text-gray-400 text-lg mt-4">No chat history</Text>
                         </View>
                     ) : (
-                        filteredHistory.map((item) => {
-                            const colors = getCategoryColor(item.category);
-                            return (
-                                <TouchableOpacity
-                                    key={item.id}
-                                    className="bg-white rounded-2xl p-4 mb-3 shadow-sm border border-gray-100"
-                                >
-                                    <View className="flex-row items-start">
-                                        <View className={`${colors.bg} rounded-full p-3 mr-3`}>
-                                            <Ionicons
-                                                name={getCategoryIcon(item.category) as any}
-                                                size={24}
-                                                color={colors.text.replace('text-', '#')}
-                                            />
-                                        </View>
-
-                                        <View className="flex-1">
-                                            <View className="flex-row items-center justify-between mb-1">
-                                                <Text className="text-gray-800 font-bold text-base flex-1">
-                                                    {item.title}
-                                                </Text>
-                                                <View className={`${colors.bg} px-3 py-1 rounded-full border ${colors.border}`}>
-                                                    <Text className={`${colors.text} text-xs font-medium capitalize`}>
-                                                        {item.category}
-                                                    </Text>
-                                                </View>
-                                            </View>
-
-                                            <View className="flex-row items-center mb-2">
-                                                <Ionicons name="calendar-outline" size={14} color="#9CA3AF" />
-                                                <Text className="text-gray-500 text-sm ml-1">{item.date}</Text>
-                                                <Ionicons name="time-outline" size={14} color="#9CA3AF" style={{ marginLeft: 12 }} />
-                                                <Text className="text-gray-500 text-sm ml-1">{item.time}</Text>
-                                            </View>
-
-                                            <Text className="text-gray-600 text-sm leading-5">
-                                                {item.summary}
-                                            </Text>
-                                        </View>
+                        chatHistory.map((item) => (
+                            <TouchableOpacity
+                                key={item.id}
+                                className="bg-white rounded-2xl p-4 mb-3 shadow-sm border border-gray-100"
+                            >
+                                <View className="flex-row items-start">
+                                    <View className="bg-[#00A67E]/10 rounded-full p-3 mr-3">
+                                        <Ionicons
+                                            name="chatbubble-ellipses"
+                                            size={24}
+                                            color="#00A67E"
+                                        />
                                     </View>
-                                </TouchableOpacity>
-                            );
-                        })
+
+                                    <View className="flex-1">
+                                        <View className="flex-row items-center justify-between mb-2">
+                                            <Text className="text-gray-800 font-bold text-base flex-1">
+                                                Chat Conversation
+                                            </Text>
+                                            <View className="bg-blue-50 px-3 py-1 rounded-full">
+                                                <Text className="text-blue-600 text-xs font-medium">
+                                                    {item.messageCount} messages
+                                                </Text>
+                                            </View>
+                                        </View>
+
+                                        <View className="flex-row items-center mb-2">
+                                            <Ionicons name="calendar-outline" size={14} color="#9CA3AF" />
+                                            <Text className="text-gray-500 text-sm ml-1">{item.date}</Text>
+                                            <Ionicons name="time-outline" size={14} color="#9CA3AF" style={{ marginLeft: 12 }} />
+                                            <Text className="text-gray-500 text-sm ml-1">{item.time}</Text>
+                                        </View>
+
+                                        <Text className="text-gray-600 text-sm leading-5" numberOfLines={2}>
+                                            {item.preview}
+                                        </Text>
+                                    </View>
+                                </View>
+                            </TouchableOpacity>
+                        ))
                     )}
 
-                    {/* Export Button */}
+                    {/* Clear History Button */}
                     <TouchableOpacity
-                        className="bg-white border-2 border-[#00A67E] rounded-2xl p-4 flex-row items-center justify-center shadow-sm mt-2 mb-6"
+                        className="bg-white border-2 border-red-500 rounded-2xl p-4 flex-row items-center justify-center shadow-sm mt-2 mb-6"
                     >
-                        <Ionicons name="download-outline" size={24} color="#00A67E" style={{ marginRight: 8 }} />
-                        <Text className="text-[#00A67E] text-lg font-bold">
-                            Export History
+                        <Ionicons name="trash-outline" size={24} color="#EF4444" style={{ marginRight: 8 }} />
+                        <Text className="text-red-500 text-lg font-bold">
+                            Clear History
                         </Text>
                     </TouchableOpacity>
                 </ScrollView>
