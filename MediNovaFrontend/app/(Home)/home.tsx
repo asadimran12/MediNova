@@ -13,8 +13,6 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Sidebar from './sidebar';
-// TODO: Re-enable after fixing build
-// import * as ImagePicker from 'expo-image-picker';
 
 interface Message {
     id: string;
@@ -36,7 +34,6 @@ export default function HomeScreen() {
     const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
     const [showSidebar, setShowSidebar] = useState(false);
 
-    // TODO: Re-enable after fixing build
     const pickImageFromCamera = async () => {
         setShowAttachmentMenu(false);
         alert('Camera feature is being configured. Please check back soon!');
@@ -90,7 +87,6 @@ export default function HomeScreen() {
     };
 
     const [isLoading, setIsLoading] = useState(false);
-    // Replace with your machine's IP address if running on physical device
     const API_URL = 'https://medinova-igij.onrender.com/chat/';
 
     const handleSend = async () => {
