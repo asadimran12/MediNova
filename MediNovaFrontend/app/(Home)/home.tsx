@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -10,6 +10,7 @@ import {
     Image,
     Modal,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Sidebar from './sidebar';
@@ -33,6 +34,26 @@ export default function HomeScreen() {
     const [inputText, setInputText] = useState('');
     const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
     const [showSidebar, setShowSidebar] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [userId, setUserId] = useState<number>(1); // Default to 1
+
+    const API_URL = 'https://medinova-igij.onrender.com/chat/';
+
+    // Load user ID on mount
+    useEffect(() => {
+        const loadUserId = async () => {
+            try {
+                const userStr = await AsyncStorage.getItem('user');
+                if (userStr) {
+                    const user = JSON.parse(userStr);
+                    setUserId(user.id || 1);
+                }
+            } catch (error) {
+                console.error('Error loading user ID:', error);
+            }
+        };
+        loadUserId();
+    }, []);
 
     const pickImageFromCamera = async () => {
         setShowAttachmentMenu(false);
@@ -86,9 +107,6 @@ export default function HomeScreen() {
         */
     };
 
-    const [isLoading, setIsLoading] = useState(false);
-    const API_URL = 'https://medinova-igij.onrender.com/chat/';
-
     const handleSend = async () => {
         if (!inputText.trim()) return;
 
@@ -110,7 +128,10 @@ export default function HomeScreen() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ message: inputText }),
+                body: JSON.stringify({
+                    message: inputText,
+                    user_id: userId
+                }),
             });
 
             const data = await response.json();
@@ -149,25 +170,27 @@ export default function HomeScreen() {
 
     const renderMessage = ({ item }: { item: Message }) => (
         <View
-            className={`mb-4 flex-row ${item.isUser ? 'justify-end' : 'justify-start'
-                }`}
+            className={`mb-4 flex-row ${item.isUser ? 'justify-end' : 'justify-start'}`}
         >
+            {/* AI Avatar (Left) */}
             {!item.isUser && (
-                <View className="w-8 h-8 rounded-full bg-green-500 items-center justify-center mr-2">
-                    <Text className="text-white font-bold">AI</Text>
+                <View className="w-10 h-10 rounded-full bg-[#00A67E] items-center justify-center mr-3">
+                    <Ionicons name="sparkles" size={20} color="white" />
                 </View>
             )}
+
+            {/* Message Content */}
             <View
-                className={`max-w-[75%] rounded-2xl px-4 py-3 ${item.isUser
-                    ? 'bg-[#00A67E] rounded-br-sm'
-                    : 'bg-gray-200 rounded-bl-sm'
+                className={`max-w-[70%] rounded-2xl px-4 py-3 ${item.isUser
+                        ? 'bg-blue-500 rounded-tr-none'
+                        : 'bg-gray-100 rounded-tl-none border border-gray-200'
                     }`}
             >
-                <Text className={`${item.isUser ? 'text-white' : 'text-gray-800'}`}>
+                <Text className={`${item.isUser ? 'text-white' : 'text-gray-800'} text-base leading-relaxed`}>
                     {item.text}
                 </Text>
                 <Text
-                    className={`text-xs mt-1 ${item.isUser ? 'text-green-100' : 'text-gray-500'
+                    className={`text-xs mt-1 ${item.isUser ? 'text-blue-100' : 'text-gray-500'
                         }`}
                 >
                     {item.timestamp.toLocaleTimeString([], {
@@ -176,9 +199,11 @@ export default function HomeScreen() {
                     })}
                 </Text>
             </View>
+
+            {/* User Avatar (Right) */}
             {item.isUser && (
-                <View className="w-8 h-8 rounded-full bg-blue-500 items-center justify-center ml-2">
-                    <Text className="text-white font-bold">U</Text>
+                <View className="w-10 h-10 rounded-full bg-blue-500 items-center justify-center ml-3">
+                    <Text className="text-white font-bold text-lg">U</Text>
                 </View>
             )}
         </View>
