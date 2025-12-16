@@ -4,7 +4,6 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from database import engine 
 from routers.auth_router import router as authrouter
-from routers.gemini_chat import router as chatrouter
 from routers.diet_router import router as dietrouter
 from dotenv import load_dotenv
 
@@ -14,7 +13,6 @@ app = FastAPI()
 
 
 app.include_router(authrouter)
-app.include_router(chatrouter)
 app.include_router(dietrouter)
 
 @app.on_event("startup")
