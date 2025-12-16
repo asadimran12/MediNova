@@ -9,6 +9,7 @@ class User(Base):
     username = Column(String, unique=True, index=True, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
+    token = Column(String, nullable=True, default=None)  # Authentication token
 
 class DietPlan(Base):
     __tablename__ = "diet_plans"

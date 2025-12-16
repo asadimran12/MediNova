@@ -1,5 +1,6 @@
 import { router } from "expo-router";
 import React, { useState } from "react";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   View,
   Text,
@@ -55,8 +56,11 @@ export default function HomeScreen() {
         return;
       }
 
-      // Store the access token (you might want to use AsyncStorage here)
-      console.log("Login successful! Token:", result.access_token);
+      // Store the access token and user data in AsyncStorage
+      await AsyncStorage.setItem('token', result.access_token);
+      await AsyncStorage.setItem('user', JSON.stringify(result.user));
+
+      console.log("Login successful! Token saved:", result.access_token);
 
       // Navigate to chatbot home page
       router.push("/(Home)/home");

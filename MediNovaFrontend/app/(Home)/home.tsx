@@ -38,21 +38,54 @@ export default function HomeScreen() {
     const [userId, setUserId] = useState<number>(1); // Default to 1
 
     const API_URL = 'https://medinova-igij.onrender.com/chat/';
+    const AUTH_URL = 'https://medinova-igij.onrender.com/auth';
 
-    // Load user ID on mount
+    // Verify token and load user ID on mount
     useEffect(() => {
-        const loadUserId = async () => {
+        const verifyAndLoadUser = async () => {
             try {
+                // Get token from AsyncStorage
+                const token = await AsyncStorage.getItem('token');
+
+                if (!token) {
+                    // No token, redirect to login
+                    console.log('No token found, redirecting to login');
+                    router.replace('/(tabs)');
+                    return;
+                }
+
+                // Verify token with backend
+                const verifyResponse = await fetch(`${AUTH_URL}/verify`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!verifyResponse.ok) {
+                    // Token is invalid, clear storage and redirect to login
+                    console.log('Token invalid, redirecting to login');
+                    await AsyncStorage.removeItem('token');
+                    await AsyncStorage.removeItem('user');
+                    router.replace('/(tabs)');
+                    return;
+                }
+
+                // Token is valid, load user data
                 const userStr = await AsyncStorage.getItem('user');
                 if (userStr) {
                     const user = JSON.parse(userStr);
                     setUserId(user.id || 1);
                 }
             } catch (error) {
-                console.error('Error loading user ID:', error);
+                console.error('Error verifying token:', error);
+                // Network error or other issues, redirect to login
+                await AsyncStorage.removeItem('token');
+                await AsyncStorage.removeItem('user');
+                router.replace('/(tabs)');
             }
         };
-        loadUserId();
+        verifyAndLoadUser();
     }, []);
 
     const pickImageFromCamera = async () => {

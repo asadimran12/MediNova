@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -19,6 +20,30 @@ export default function Sidebar({ onClose }: SidebarProps) {
     const handleMenuPress = (route: string) => {
         onClose();
         router.push(route as any);
+    };
+
+    const handleLogout = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+
+            if (token) {
+                // Call backend logout endpoint
+                await fetch('https://medinova-igij.onrender.com/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+        } finally {
+            // Clear storage regardless of backend response
+            await AsyncStorage.removeItem('token');
+            await AsyncStorage.removeItem('user');
+            onClose();
+            router.replace('/(tabs)');
+        }
     };
 
     return (
@@ -70,10 +95,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
             {/* Footer */}
             <View className="border-t border-gray-200 p-4">
                 <TouchableOpacity
-                    onPress={() => {
-                        onClose();
-                        router.replace('/(tabs)');
-                    }}
+                    onPress={handleLogout}
                     className="flex-row items-center justify-center bg-red-50 rounded-xl p-4"
                 >
                     <Ionicons name="log-out-outline" size={24} color="#EF4444" />
