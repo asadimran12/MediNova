@@ -41,7 +41,7 @@ User Question: """
         full_prompt = system_instruction + request.message
         
         # Use Gemini AI for general health-related chat
-        model = genai.GenerativeModel('gemini-2.0-flash-exp')
+        model = genai.GenerativeModel('gemini-2.5-flash')
         response = model.generate_content(full_prompt)
         
         return {

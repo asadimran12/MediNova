@@ -35,45 +35,8 @@ export default function DietPlanScreen() {
 
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-    // Diet plan data - loaded from backend or sample data
-    const [dietPlan, setDietPlan] = useState<Record<string, DayPlan>>({
-        Monday: {
-            breakfast: [
-                { name: 'Oatmeal with Berries', calories: 320, protein: 12, carbs: 54, fat: 6 },
-                { name: 'Greek Yogurt', calories: 150, protein: 15, carbs: 12, fat: 4 },
-            ],
-            lunch: [
-                { name: 'Grilled Chicken Salad', calories: 450, protein: 35, carbs: 25, fat: 18 },
-                { name: 'Quinoa Bowl', calories: 280, protein: 10, carbs: 45, fat: 8 },
-            ],
-            dinner: [
-                { name: 'Baked Salmon', calories: 380, protein: 40, carbs: 5, fat: 22 },
-                { name: 'Steamed Vegetables', calories: 120, protein: 4, carbs: 20, fat: 2 },
-            ],
-            snacks: [
-                { name: 'Apple with Almond Butter', calories: 200, protein: 5, carbs: 22, fat: 12 },
-                { name: 'Protein Shake', calories: 180, protein: 25, carbs: 8, fat: 4 },
-            ],
-        },
-        Tuesday: {
-            breakfast: [
-                { name: 'Scrambled Eggs', calories: 280, protein: 20, carbs: 4, fat: 18 },
-                { name: 'Whole Grain Toast', calories: 140, protein: 6, carbs: 24, fat: 2 },
-            ],
-            lunch: [
-                { name: 'Turkey Wrap', calories: 380, protein: 28, carbs: 35, fat: 14 },
-                { name: 'Mixed Greens Salad', calories: 120, protein: 3, carbs: 12, fat: 7 },
-            ],
-            dinner: [
-                { name: 'Grilled Chicken Breast', calories: 330, protein: 42, carbs: 0, fat: 16 },
-                { name: 'Sweet Potato', calories: 180, protein: 4, carbs: 41, fat: 0 },
-            ],
-            snacks: [
-                { name: 'Mixed Nuts', calories: 170, protein: 6, carbs: 6, fat: 15 },
-                { name: 'Carrot Sticks with Hummus', calories: 140, protein: 5, carbs: 16, fat: 7 },
-            ],
-        },
-    });
+    // Diet plan data - loaded from backend API only
+    const [dietPlan, setDietPlan] = useState<Record<string, DayPlan>>({});
 
     const currentPlan = dietPlan[selectedDay] || {
         breakfast: [],
@@ -129,10 +92,11 @@ export default function DietPlanScreen() {
     const loadDietPlan = async (uid: number) => {
         try {
             const response = await fetch(`${API_URL}/diet/${uid}`);
+            console.log(uid)
             const data = await response.json();
+            console.log(data)
             if (data.success && data.diet_plan) {
                 setDietPlan(data.diet_plan);
-                // setDietPlan(data.diet_plan); // This line was commented out or missing context in the original
             }
         } catch (error) {
             console.error('Error loading diet plan:', error);
@@ -236,21 +200,41 @@ export default function DietPlanScreen() {
 
                 {/* Meal Plans */}
                 <ScrollView className="flex-1 px-4 py-4" showsVerticalScrollIndicator={false}>
-                    {renderMealSection('Breakfast', currentPlan.breakfast, 'sunny')}
-                    {renderMealSection('Lunch', currentPlan.lunch, 'restaurant')}
-                    {renderMealSection('Dinner', currentPlan.dinner, 'moon')}
-                    {renderMealSection('Snacks', currentPlan.snacks, 'nutrition')}
-
-                    {/* Info Card */}
-                    <View className="bg-green-50 rounded-2xl p-4 mb-6 border border-green-100 mt-4">
-                        <View className="flex-row items-center mb-2">
-                            <Ionicons name="information-circle" size={20} color="#00A67E" />
-                            <Text className="text-green-700 font-bold ml-2">Get Your Diet Plan</Text>
+                    {isLoading ? (
+                        <View className="flex-1 items-center justify-center py-20">
+                            <ActivityIndicator size="large" color="#00A67E" />
+                            <Text className="text-gray-500 mt-4">Loading your diet plan...</Text>
                         </View>
-                        <Text className="text-green-600 text-sm">
-                            Ask me to create a diet plan in the chat, and I'll generate a personalized weekly meal plan for you! Just say "create me a diet plan" or "I need a meal plan" to get started.
-                        </Text>
-                    </View>
+                    ) : Object.keys(dietPlan).length === 0 ? (
+                        <View className="bg-orange-50 rounded-2xl p-6 mb-6 border border-orange-200">
+                            <View className="flex-row items-center mb-3">
+                                <Ionicons name="restaurant-outline" size={24} color="#F97316" />
+                                <Text className="text-orange-700 font-bold ml-2 text-lg">No Diet Plan Yet</Text>
+                            </View>
+                            <Text className="text-orange-600 text-sm leading-6">
+                                You don't have a diet plan yet. Go to the chat and ask me to create a personalized diet plan for you!{'\n\n'}
+                                Just say: "Create me a diet plan" or "I need a meal plan"
+                            </Text>
+                        </View>
+                    ) : (
+                        <>
+                            {renderMealSection('Breakfast', currentPlan.breakfast, 'sunny')}
+                            {renderMealSection('Lunch', currentPlan.lunch, 'restaurant')}
+                            {renderMealSection('Dinner', currentPlan.dinner, 'moon')}
+                            {renderMealSection('Snacks', currentPlan.snacks, 'nutrition')}
+
+                            {/* Info Card */}
+                            <View className="bg-green-50 rounded-2xl p-4 mb-6 border border-green-100 mt-4">
+                                <View className="flex-row items-center mb-2">
+                                    <Ionicons name="information-circle" size={20} color="#00A67E" />
+                                    <Text className="text-green-700 font-bold ml-2">Update Your Diet Plan</Text>
+                                </View>
+                                <Text className="text-green-600 text-sm">
+                                    Want a new diet plan? Go back to chat and ask me to create a fresh one for you!
+                                </Text>
+                            </View>
+                        </>
+                    )}
 
                     {/* Tips Card */}
                     <View className="bg-blue-50 rounded-2xl p-4 mb-6 border border-blue-100">
