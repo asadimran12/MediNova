@@ -92,9 +92,7 @@ export default function DietPlanScreen() {
     const loadDietPlan = async (uid: number) => {
         try {
             const response = await fetch(`${API_URL}/diet/${uid}`);
-            console.log(uid)
             const data = await response.json();
-            console.log(data)
             if (data.success && data.diet_plan) {
                 setDietPlan(data.diet_plan);
             }

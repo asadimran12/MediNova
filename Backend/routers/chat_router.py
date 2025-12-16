@@ -26,6 +26,44 @@ async def chat(request: ChatRequest):
         raise HTTPException(status_code=500, detail="Gemini API key not configured")
     
     try:
+        message_lower = request.message.lower()
+        
+        # Check for diet plan keywords
+        is_diet_request = any(keyword in message_lower for keyword in [
+            'diet plan', 'meal plan', 'diet', 'nutrition plan', 'eating plan',
+            'food plan', 'weekly diet', 'daily diet', 'create diet', 'make diet'
+        ])
+        
+        # Check for exercise plan keywords
+        is_exercise_request = any(keyword in message_lower for keyword in [
+            'exercise plan', 'workout plan', 'exercise', 'workout', 'fitness plan',
+            'training plan', 'gym plan', 'create exercise', 'make workout'
+        ])
+        
+        if is_diet_request:
+            return {
+                "response": "I can help you create a personalized diet plan! 🍽️\n\n" +
+                           "To generate your diet plan:\n" +
+                           "• Open the sidebar menu\n" +
+                           "• Go to 'Diet Plan'\n" +
+                           "• You'll find an AI-generated weekly meal plan with detailed nutrition information\n\n" +
+                           "The diet plan includes breakfast, lunch, dinner, and snacks for all 7 days of the week!",
+                "user_id": request.user_id,
+                "plan_type": "diet"
+            }
+        
+        if is_exercise_request:
+            return {
+                "response": "I can help you create a personalized exercise plan! 💪\n\n" +
+                           "To generate your exercise plan:\n" +
+                           "• Open the sidebar menu\n" +
+                           "• Go to 'Exercise Plan'\n" +
+                           "• You'll find an AI-generated weekly workout plan organized by category\n\n" +
+                           "The plan includes Cardio, Strength, and Flexibility exercises for all 7 days!",
+                "user_id": request.user_id,
+                "plan_type": "exercise"
+            }
+        
         # Create a prompt that requests point-to-point answers
         system_instruction = """You are a helpful medical AI assistant. Provide concise, point-to-point answers.
         

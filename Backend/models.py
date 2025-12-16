@@ -24,3 +24,17 @@ class DietPlan(Base):
     carbs = Column(Float, nullable=False)
     fat = Column(Float, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class ExercisePlan(Base):
+    __tablename__ = "exercise_plans"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, nullable=False, index=True)
+    day = Column(String, nullable=False)  # Monday, Tuesday, etc.
+    category = Column(String, nullable=False)  # Cardio, Strength, Flexibility
+    exercise_name = Column(String, nullable=False)
+    duration = Column(Integer, nullable=False)  # minutes
+    calories = Column(Float, nullable=False)
+    sets = Column(Integer, nullable=True)  # for strength training
+    reps = Column(Integer, nullable=True)  # for strength training
+    created_at = Column(DateTime, default=datetime.utcnow)

@@ -6,6 +6,7 @@ from database import engine
 from routers.auth_router import router as authrouter
 from routers.chat_router import router as chatrouter
 from routers.diet_router import router as dietrouter
+from routers.exercise_router import router as exerciserouter
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -16,6 +17,7 @@ app = FastAPI()
 app.include_router(authrouter)
 app.include_router(chatrouter)
 app.include_router(dietrouter)
+app.include_router(exerciserouter)
 
 @app.on_event("startup")
 def test_db_connection():
