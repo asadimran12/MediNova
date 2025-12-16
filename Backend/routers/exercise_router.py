@@ -82,6 +82,12 @@ async def generate_exercise_plan(request: GenerateExerciseRequest, db: Session =
         model = genai.GenerativeModel('gemini-2.5-flash')
         response = model.generate_content(prompt)
         
+        # Log raw response for debugging
+        print("="*50)
+        print("RAW GEMINI RESPONSE:")
+        print(response.text)
+        print("="*50)
+        
         # Parse the response
         response_text = response.text.strip()
         # Remove markdown code blocks if present
@@ -91,13 +97,30 @@ async def generate_exercise_plan(request: GenerateExerciseRequest, db: Session =
                 response_text = response_text[4:]
             response_text = response_text.strip()
         
-        exercise_plan = json.loads(response_text)
+        print("CLEANED RESPONSE:")
+        print(response_text[:500])  # Print first 500 chars
+        print("="*50)
+        
+        try:
+            exercise_plan = json.loads(response_text)
+        except json.JSONDecodeError as json_err:
+            print(f"JSON Parse Error: {json_err}")
+            print(f"Attempted to parse: {response_text[:200]}")
+            raise HTTPException(
+                status_code=500, 
+                detail=f"Failed to parse AI response as JSON. AI returned invalid format. Error: {str(json_err)}"
+            )
+        
+        # Validate structure
+        if not isinstance(exercise_plan, dict):
+            raise HTTPException(status_code=500, detail="AI response is not a valid exercise plan structure")
         
         # Delete old plan for this user
         db.query(ExercisePlan).filter(ExercisePlan.user_id == request.user_id).delete()
         db.commit()
         
         # Save new plan to database
+        saved_count = 0
         for day, categories in exercise_plan.items():
             for category, exercises in categories.items():
                 for exercise in exercises:
@@ -112,13 +135,20 @@ async def generate_exercise_plan(request: GenerateExerciseRequest, db: Session =
                         reps=exercise.get("reps")
                     )
                     db.add(exercise_entry)
+                    saved_count += 1
         db.commit()
         
-        return {"success": True, "exercise_plan": exercise_plan}
+        print(f"✅ Saved {saved_count} exercises to database for user {request.user_id}")
+        
+        return {"success": True, "exercise_plan": exercise_plan, "saved_count": saved_count}
     except json.JSONDecodeError as e:
+        print(f"❌ JSON Decode Error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to parse AI response: {str(e)}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"❌ General Error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error generating exercise plan: {str(e)}")
 
 @router.get("/{user_id}")
 def get_exercise_plan(user_id: int, db: Session = Depends(get_db)):
