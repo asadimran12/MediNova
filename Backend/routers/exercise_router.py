@@ -38,7 +38,7 @@ class GenerateExerciseRequest(BaseModel):
     preferences: str = ""  # e.g., "beginner, no equipment"
 
 @router.post("/generate")
-async def generate_exercise_plan(request: GenerateExerciseRequest):
+async def generate_exercise_plan(request: GenerateExerciseRequest, db: Session = Depends(get_db)):
     """Generate a personalized exercise plan using Gemini AI"""
     if not GEMINI_API_KEY:
         raise HTTPException(status_code=500, detail="Gemini API key not configured")
@@ -92,6 +92,27 @@ async def generate_exercise_plan(request: GenerateExerciseRequest):
             response_text = response_text.strip()
         
         exercise_plan = json.loads(response_text)
+        
+        # Delete old plan for this user
+        db.query(ExercisePlan).filter(ExercisePlan.user_id == request.user_id).delete()
+        db.commit()
+        
+        # Save new plan to database
+        for day, categories in exercise_plan.items():
+            for category, exercises in categories.items():
+                for exercise in exercises:
+                    exercise_entry = ExercisePlan(
+                        user_id=request.user_id,
+                        day=day,
+                        category=category,
+                        exercise_name=exercise["exercise_name"],
+                        duration=exercise["duration"],
+                        calories=exercise["calories"],
+                        sets=exercise.get("sets"),
+                        reps=exercise.get("reps")
+                    )
+                    db.add(exercise_entry)
+        db.commit()
         
         return {"success": True, "exercise_plan": exercise_plan}
     except json.JSONDecodeError as e:
