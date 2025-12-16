@@ -79,7 +79,7 @@ async def generate_exercise_plan(request: GenerateExerciseRequest):
         
         Make exercises realistic and achievable. Vary the exercises across the week."""
         
-        model = genai.GenerativeModel('gemini-2.0-flash-exp')
+        model = genai.GenerativeModel('gemini-2.5-flash')
         response = model.generate_content(prompt)
         
         # Parse the response
