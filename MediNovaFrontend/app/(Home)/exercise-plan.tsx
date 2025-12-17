@@ -34,9 +34,7 @@ export default function ExercisePlanScreen() {
     const [userId, setUserId] = useState<number>(1);
     const [exercises, setExercises] = useState<Record<string, WorkoutPlan>>({});
 
-    const API_URL = __DEV__
-        ? 'http://192.168.43.32:8000'  // local development
-        : 'https://medinova-igij.onrender.com';  // production
+    const API_URL = 'https://medinova-igij.onrender.com';  // production
 
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 

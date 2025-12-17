@@ -29,11 +29,8 @@ export default function ProfileScreen() {
         emergencyContact: '',
     });
 
-    const API_URL = __DEV__
-        ? 'http://192.168.43.32:8000'
-        : 'https://medinova-igij.onrender.com';
+    const API_URL = 'https://medinova-igij.onrender.com';
 
-    // Load profile data on mount
     useEffect(() => {
         loadProfile();
     }, []);
