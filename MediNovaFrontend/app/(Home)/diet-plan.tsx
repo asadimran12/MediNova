@@ -31,7 +31,9 @@ export default function DietPlanScreen() {
     const [selectedDay, setSelectedDay] = useState('Monday');
     const [isLoading, setIsLoading] = useState(true);
     const [userId, setUserId] = useState<number | null>(null);
-    const API_URL = 'https://medinova-igij.onrender.com';
+    const API_URL = __DEV__
+        ? 'http://192.168.43.32:8000'  // local development
+        : 'https://medinova-igij.onrender.com';  // production
 
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -95,9 +97,61 @@ export default function DietPlanScreen() {
             const data = await response.json();
             if (data.success && data.diet_plan) {
                 setDietPlan(data.diet_plan);
+            } else {
+                // No plan found, automatically generate one
+                console.log('No diet plan found, auto-generating...');
+                await generateDietPlan(uid);
             }
         } catch (error) {
             console.error('Error loading diet plan:', error);
+        }
+    };
+
+    const generateDietPlan = async (uid: number) => {
+        try {
+            const response = await fetch(`${API_URL}/diet/generate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: uid, preferences: '' })
+            });
+            const data = await response.json();
+
+            if (data.success && data.diet_plan) {
+                // Save the generated plan to database
+                await saveDietPlanToDatabase(uid, data.diet_plan);
+                setDietPlan(data.diet_plan);
+            }
+        } catch (error) {
+            console.error('Error generating diet plan:', error);
+        }
+    };
+
+    const saveDietPlanToDatabase = async (uid: number, plan: Record<string, DayPlan>) => {
+        try {
+            // Save each meal to database
+            for (const [day, meals] of Object.entries(plan)) {
+                for (const [mealType, items] of Object.entries(meals)) {
+                    for (const item of items) {
+                        await fetch(`${API_URL}/diet/save`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                user_id: uid,
+                                day: day,
+                                meal_type: mealType,
+                                meal_name: item.name,
+                                calories: item.calories,
+                                protein: item.protein,
+                                carbs: item.carbs,
+                                fat: item.fat
+                            })
+                        });
+                    }
+                }
+            }
+            console.log('✅ Diet plan saved to database');
+        } catch (error) {
+            console.error('Error saving diet plan:', error);
         }
     };
 
@@ -207,12 +261,12 @@ export default function DietPlanScreen() {
                         <View className="bg-orange-50 rounded-2xl p-6 mb-6 border border-orange-200">
                             <View className="flex-row items-center mb-3">
                                 <Ionicons name="restaurant-outline" size={24} color="#F97316" />
-                                <Text className="text-orange-700 font-bold ml-2 text-lg">No Diet Plan Yet</Text>
+                                <Text className="text-orange-700 font-bold ml-2 text-lg">Generating Your Diet Plan</Text>
                             </View>
-                            <Text className="text-orange-600 text-sm leading-6">
-                                You don't have a diet plan yet. Go to the chat and ask me to create a personalized diet plan for you!{'\n\n'}
-                                Just say: "Create me a diet plan" or "I need a meal plan"
+                            <Text className="text-orange-600 text-sm leading-6 mb-4">
+                                Please wait while we create your personalized weekly meal plan...
                             </Text>
+                            <ActivityIndicator size="large" color="#00A67E" />
                         </View>
                     ) : (
                         <>

@@ -34,7 +34,9 @@ export default function ExercisePlanScreen() {
     const [userId, setUserId] = useState<number>(1);
     const [exercises, setExercises] = useState<Record<string, WorkoutPlan>>({});
 
-    const API_URL = 'https://medinova-igij.onrender.com';
+    const API_URL = __DEV__
+        ? 'http://192.168.43.32:8000'  // local development
+        : 'https://medinova-igij.onrender.com';  // production
 
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -296,10 +298,11 @@ export default function ExercisePlanScreen() {
                         <View className="bg-white rounded-2xl p-6 mb-4">
                             <View className="items-center py-8">
                                 <Ionicons name="fitness-outline" size={80} color="#9CA3AF" />
-                                <Text className="text-xl font-bold text-gray-800 mt-4 mb-2">No Exercise Plan Yet</Text>
+                                <Text className="text-xl font-bold text-gray-800 mt-4 mb-2">Generating Your Exercise Plan</Text>
                                 <Text className="text-gray-600 text-center mb-6 px-4">
-                                    Generate your personalized AI workout plan to get started on your fitness journey!
+                                    Please wait while we create your personalized AI workout plan...
                                 </Text>
+                                <ActivityIndicator size="large" color="#00A67E" />
                             </View>
                         </View>
                     ) : (
@@ -309,23 +312,6 @@ export default function ExercisePlanScreen() {
                             {renderExerciseSection('Flexibility & Recovery', currentPlan?.Flexibility || [], 'body', 'purple', 'Flexibility')}
                         </>
                     )}
-
-                    {/* AI Generation Button */}
-                    <TouchableOpacity
-                        onPress={handleGenerateAIPlan}
-                        disabled={isGenerating}
-                        className="bg-[#00A67E] rounded-2xl p-4 flex-row items-center justify-center shadow-lg mt-4 mb-6"
-                    >
-                        <Ionicons
-                            name={isGenerating ? 'reload' : 'sparkles'}
-                            size={24}
-                            color="white"
-                            style={{ marginRight: 8 }}
-                        />
-                        <Text className="text-white text-lg font-bold">
-                            {isGenerating ? 'Generating...' : 'Generate AI Workout Plan'}
-                        </Text>
-                    </TouchableOpacity>
 
                     {/* Fitness Tips Card */}
                     <View className="bg-green-50 rounded-2xl p-4 mb-6 border border-green-100">

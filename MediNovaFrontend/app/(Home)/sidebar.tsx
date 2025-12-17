@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
@@ -9,6 +9,24 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ onClose }: SidebarProps) {
+    const [username, setUsername] = useState('User');
+
+    useEffect(() => {
+        loadUsername();
+    }, []);
+
+    const loadUsername = async () => {
+        try {
+            const userStr = await AsyncStorage.getItem('user');
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                setUsername(user.username || 'User');
+            }
+        } catch (error) {
+            console.error('Error loading username:', error);
+        }
+    };
+
     const menuItems = [
         { icon: 'restaurant', label: 'Diet Plan', route: '/(Home)/diet-plan' },
         { icon: 'fitness', label: 'Exercise Plan', route: '/(Home)/exercise-plan' },
@@ -68,7 +86,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
                     </View>
                     <View>
                         <Text className="text-gray-800 text-lg font-bold">Welcome Back!</Text>
-                        <Text className="text-gray-500 text-sm">User</Text>
+                        <Text className="text-gray-500 text-sm">{username}</Text>
                     </View>
                 </View>
             </View>

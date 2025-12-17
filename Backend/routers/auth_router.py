@@ -129,3 +129,81 @@ def verify_user(user: User = Depends(verify_token)):
             "email": user.email
         }
     }
+
+# ----------------------
+# Get user profile
+# ----------------------
+@router.get("/profile")
+def get_profile(user: User = Depends(verify_token)):
+    """Get current user's profile information"""
+    return {
+        "success": True,
+        "profile": {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "phone": user.phone,
+            "age": user.age,
+            "gender": user.gender,
+            "blood_type": user.blood_type,
+            "height": user.height,
+            "weight": user.weight,
+            "allergies": user.allergies,
+            "emergency_contact": user.emergency_contact
+        }
+    }
+
+# ----------------------
+# Update user profile
+# ----------------------
+class UpdateProfileRequest(BaseModel):
+    phone: Optional[str] = None
+    age: Optional[int] = None
+    gender: Optional[str] = None
+    blood_type: Optional[str] = None
+    height: Optional[float] = None
+    weight: Optional[float] = None
+    allergies: Optional[str] = None
+    emergency_contact: Optional[str] = None
+
+@router.put("/profile")
+def update_profile(data: UpdateProfileRequest, user: User = Depends(verify_token), db: Session = Depends(get_db)):
+    """Update current user's profile information"""
+    # Update only provided fields
+    if data.phone is not None:
+        user.phone = data.phone
+    if data.age is not None:
+        user.age = data.age
+    if data.gender is not None:
+        user.gender = data.gender
+    if data.blood_type is not None:
+        user.blood_type = data.blood_type
+    if data.height is not None:
+        user.height = data.height
+    if data.weight is not None:
+        user.weight = data.weight
+    if data.allergies is not None:
+        user.allergies = data.allergies
+    if data.emergency_contact is not None:
+        user.emergency_contact = data.emergency_contact
+    
+    db.commit()
+    db.refresh(user)
+    
+    return {
+        "success": True,
+        "message": "Profile updated successfully",
+        "profile": {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "phone": user.phone,
+            "age": user.age,
+            "gender": user.gender,
+            "blood_type": user.blood_type,
+            "height": user.height,
+            "weight": user.weight,
+            "allergies": user.allergies,
+            "emergency_contact": user.emergency_contact
+        }
+    }

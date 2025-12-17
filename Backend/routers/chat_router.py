@@ -63,6 +63,7 @@ async def chat(request: ChatRequest):
                 "user_id": request.user_id,
                 "plan_type": "exercise"
             }
+        print(request.user_id)
         
         # Create a prompt that requests point-to-point answers
         system_instruction = """You are a helpful medical AI assistant. Provide concise, point-to-point answers.

@@ -10,6 +10,16 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
     token = Column(String, nullable=True, default=None)  # Authentication token
+    
+    # Profile fields
+    phone = Column(String, nullable=True)
+    age = Column(Integer, nullable=True)
+    gender = Column(String, nullable=True)
+    blood_type = Column(String, nullable=True)
+    height = Column(Float, nullable=True)  # in cm
+    weight = Column(Float, nullable=True)  # in kg
+    allergies = Column(String, nullable=True)
+    emergency_contact = Column(String, nullable=True)
 
 class DietPlan(Base):
     __tablename__ = "diet_plans"

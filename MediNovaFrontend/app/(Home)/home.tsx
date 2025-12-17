@@ -37,8 +37,12 @@ export default function HomeScreen() {
     const [isLoading, setIsLoading] = useState(false);
     const [userId, setUserId] = useState<number>(1); // Default to 1
 
-    const API_URL = 'https://medinova-igij.onrender.com/chat/';
-    const AUTH_URL = 'https://medinova-igij.onrender.com/auth';
+    const API_URL = __DEV__
+        ? 'http://192.168.43.32:8000/chat/'  // local development
+        : 'https://medinova-igij.onrender.com/chat/';  // production
+    const AUTH_URL = __DEV__
+        ? 'http://192.168.43.32:8000/auth'  // local development
+        : 'https://medinova-igij.onrender.com/auth';  // production
 
     // Verify token and load user ID on mount
     useEffect(() => {

@@ -15,7 +15,9 @@ import {
 import Constants from 'expo-constants';
 
 // Backend API URL
-const API_URL = 'https://medinova-igij.onrender.com';
+const API_URL = __DEV__
+  ? 'http://192.168.43.32:8000'  // local development
+  : 'https://medinova-igij.onrender.com';  // production
 
 
 export default function SignupScreen() {
